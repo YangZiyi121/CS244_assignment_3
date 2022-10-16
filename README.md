@@ -120,6 +120,23 @@ However, in this experiment, the result is not that clear. The throughput does n
 
 The main problem here is BQL(Byte Queue Limits). BQL sets limits on how much data can be queued at the current time. It holds and drops bytes that exceed the limit above the driver queue. This will highly affect the result. 
 
+**UDP throughput changes on U280**
+
+The cmd I used for testing is shown as follows. 
+
+```bash
+iperf -c 10.72.138.18 -t 30 -b 100G -u
+```
+
+| Connection type   | txqueuelen = 1 | txqueuelen = 10 | txqueuelen = 100 | txqueuelen = 1000 | txqueuelen = 10000 | txqueuelen = 100000 | txqueuelen = 1000000 |
+| ----------------- | -------------- | --------------- | ---------------- | ----------------- | ------------------ | ------------------- | -------------------- |
+| 100Gbps DAC cable | 8.00 Gbits/sec | 5.78Gbits/sec   | 7.92Gbits/sec    | 5.77Gbits/s       | 5.80Gbits/s        | 8.01Gbit/s          | 6.88Gbits/s          |
+
+![u280throughput](Figures/u280throughput.png)
+
+
+
+
 <h5>Throughput changes adjusting BQL</h5>
 
 From the above experiments, we can see that the Qdisc queue length does not greatly affect the throughput. I tried to change BQL and see the throughput changes in this part. Moreover, UDP is selected to get rid of TCP congestion control logic.
@@ -146,7 +163,7 @@ From the above result, we can see that the sending bitrate of UDP does not vary 
 I used ping cmd to test the delay change according to queue size.
 
 ```bash
-ping -c 30 10.72.138.15
+ping -c 30 serverAddr
 ```
 
 **From local to AWS EC2 instance**
@@ -183,4 +200,18 @@ This experiment is done from local to a private AWS ec2 server in London. Before
 
 The result is even more ambigious than the previous one. I noticed that the devariance is comparable large for a 2-hop server. When I tried to run iPerf from local to the workstation, I also encountered a large amount of packet loss. This is something happens when connecting to public server. The server is not only handling your ping request but also other requests. This introduces a lot of errors for the experiment.
 
-However, we can see the trend that delay increases when txqueuelen increases. 
+**From NIC to U280**
+
+| txqueuelen | min (ms) | avg(ms) | max(ms) | dev(ms) |
+| ---------- | -------- | ------- | ------- | ------- |
+| 0          | 0.024    | 0.028   | 0.039   | 0.006   |
+| 10         | 0.025    | 0.029   | 0.042   | 0.004   |
+| 100        | 0.024    | 0.028   | 0.038   | 0.004   |
+| 1000       | 0.017    | 0.022   | 0.056   | 0.008   |
+| 10000      | 0.017    | 0.021   | 0.044   | 0.008   |
+| 100000     | 0.025    | 0.028   | 0.039   | 0.007   |
+| 1000000    | 0.026    | 0.028   | 0.039   | 0.007   |
+
+![udpu280](Figures/udpu280.png)
+
+txqueuelen = 1000 and  txqueuelen = 10000 have comparable low delays. 
