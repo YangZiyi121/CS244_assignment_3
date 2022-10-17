@@ -214,7 +214,7 @@ The same experiment is done with the workstation of our lab. There are only two 
 
 ![udpu280](Figures/udpu280.png)
 
-This experiment is done from the NIC (client) to FPGA board (server) directly. They are connected using a 100Gbits DAC cable and the thtoughput tested using iperf is around 30Gbits/s. we can see that the txqueuelen generates the lowest delay is **10000**.
+This experiment is done from the NIC (client) to FPGA board (server) directly. They are connected using a 100Gbits DAC cable and the throughput tested using iperf is around 30Gbits/s. we can see that the txqueuelen generates the lowest delay is **10000**.
 
 <h5>Optimal queue size</h5>
 
