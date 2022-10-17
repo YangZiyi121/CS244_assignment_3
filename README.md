@@ -156,7 +156,7 @@ iperf3 -c 52.56.42.228 -t 30 -b 100G -u -V
 
 ![BQL](Figures/BQL.png)
 
-From the above result, we can see that the sending bitrate of UDP does not vary too much for different queue sizes since the target bitrate is the same. However, the receiver bitrate increases with the queue size. It makes sense since Byte queue limits are a mechanism to limit the size of the transmit hardware queue on a NIC by the number of bytes. If we set the limit low, the packets will be transmitted without sacrificing throughput. If we set the limit high, the packets will full fill the capacity. 
+From the above result, we can see that the sending bitrate of UDP does not vary too much for different queue sizes since the target bitrate is the same. However, the receiver bitrate increases with the queue size. It makes sense since Byte queue limits are a mechanism to limit the size of the transmit hardware queue on a NIC by the number of bytes. If we set the limit low, the packets will be transmitted without sacrificing throughput. If we set the limit high, the packets will full-fill the capacity. 
 
 <h5> Packet delay while manipulating the queue size in Linux</h5>
 
@@ -180,9 +180,9 @@ ping -c 30 serverAddr
 
 ![udpAWS](Figures/udpAWS.png)
 
-From the above figure, we can see that the delay increases with the txqueuelen. When txqueulen is small, the NIC driver wakes to pull packets off of the queue for transmission and the queue is empty, the hardware will miss a transmission opportunity, thereby reducing the throughput of the system. This is referred to as **starvation**. When txqueuelen is large,  the NIC driver will be full filled and the packet needs to wait for tranmission. This will increase **latency**. 
+From the above figure, we can see that the delay increases with the txqueuelen. When txqueulen is small, the NIC driver wakes to pull packets off of the queue for transmission and the queue is empty, the hardware will miss a transmission opportunity, thereby reducing the throughput of the system. This is referred to as **starvation**. However,  this will cause **overflows that drop packets**. When txqueuelen is large,  the NIC driver will be full filled and the packet needs to wait for tranmission. This will increase **latency**.  The txqueuelen gives the best performance should be the one fitting the network connection and NIC device. 
 
-This experiment is done from local to a private AWS ec2 server in London. Before entering the server, the packet will experience a lot of queueing on all kinds of routers and switches. This introduces a lot of uncertainties. Therefore, I decided to try the same experiment with the workstation of our lab. There is only two hops in between.
+This experiment is done from my local laptop to a private AWS ec2 server in London. The network in between is considerable weak because of the long distance. The txqueuelen generates the lowest latency is **10**. 
 
 **From local to kw61088 (2 hops)**
 
@@ -198,9 +198,9 @@ This experiment is done from local to a private AWS ec2 server in London. Before
 
 ![udplocal](Figures/udplocal.png)
 
-The result is even more ambigious than the previous one. I noticed that the devariance is comparable large for a 2-hop server. When I tried to run iPerf from local to the workstation, I also encountered a large amount of packet loss. This is something happens when connecting to public server. The server is not only handling your ping request but also other requests. This introduces a lot of errors for the experiment.
+The same experiment is done with the workstation of our lab. There are only two hops in between. We can see that the txqueuelen generates the lowest delay is **1000**. 
 
-**From NIC to U280**
+**From NIC to U280(FPGA)**
 
 | txqueuelen | min (ms) | avg(ms) | max(ms) | dev(ms) |
 | ---------- | -------- | ------- | ------- | ------- |
@@ -214,4 +214,9 @@ The result is even more ambigious than the previous one. I noticed that the deva
 
 ![udpu280](Figures/udpu280.png)
 
-txqueuelen = 1000 and  txqueuelen = 10000 have comparable low delays. 
+This experiment is done from the NIC (client) to FPGA board (server) directly. They are connected using a 100Gbits DAC cable and the thtoughput tested using iperf is around 30Gbits/s. we can see that the txqueuelen generates the lowest delay is **10000**.
+
+<h5>Optimal queue size</h5>
+
+The optimal queue size should be the one fitting the network connection and NIC device the most. 
+
